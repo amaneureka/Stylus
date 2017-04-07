@@ -1,0 +1,72 @@
+# -*- coding: utf-8 -*-
+# @Author: amaneureka
+# @Date:   2017-04-07 17:41:23
+# @Last Modified by:   amaneureka
+# @Last Modified time: 2017-04-08 05:11:47
+
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+def find_samples_bounding_rect(path):
+
+	min_w = 0
+	min_h = 0
+
+	for i in range(1, 63):
+		for j in range(1, 56):
+
+			filename = '{0}/Sample{1:03d}/img{1:03d}-{2:03d}.png'.format(path, i, j)
+
+			# opencv read -> Gray Image -> Bounding Rect
+			im = cv2.imread(filename)
+			imgray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+			imgray = cv2.bitwise_not(imgray)
+			_, contours, _ = cv2.findContours(imgray, cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
+			_, _, w, h = cv2.boundingRect(contours[len(contours) - 1])
+
+			# find maximum resolution
+			min_w = max(min_w, w)
+			min_h = max(min_h, h)
+
+	return min_w, min_h
+
+
+def crop_images(path, width, height, showsamples):
+
+	with open(path + '/normalized.bin', 'wb') as f:
+
+		for i in range(1, 63):
+			for j in range(1, 56):
+
+				filename = '{0}/Sample{1:03d}/img{1:03d}-{2:03d}.png'.format(path, i, j)
+
+				# opencv read -> Gray Image -> Bounding Rect
+				im = cv2.imread(filename)
+				imgray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+				imgray = cv2.bitwise_not(imgray)
+				_, contours, _ = cv2.findContours(imgray, cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
+				x, y, w, h = cv2.boundingRect(contours[len(contours) - 1])
+
+				# center align character
+				offset_x = (width - w) / 2
+				offset_y = (height - h) / 2
+				x = max(x - offset_x, 0)
+				y = max(y - offset_y, 0)
+				newimg = imgray[y : y + height, x : x + width]
+
+				# append ndarry to file
+				f.write(newimg.flatten())
+
+				# preview if requested
+				if showsamples and j == 1:
+					plt.imshow(newimg, cmap='gray')
+					plt.show()
+
+		f.close()
+
+if __name__ == '__main__':
+	width, height = 751, 841#find_samples_bounding_rect('dataset')
+	print width, height
+	crop_images('dataset', width, height, False)
