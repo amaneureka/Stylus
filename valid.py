@@ -9,6 +9,7 @@ from shutil import copyfile
 # make changes in the path
 #program copies out ~33% of dataset as validation set
 # modify the code to cut and paste the files
+# Copies direct images. You will have to normalize again
 os.makedirs("/home/slifer/Py/~/Py/Stylus-master/valid_data")
 cpy_pat= r'/home/slifer/Py/~/Py/Stylus-master/valid_data'
 
