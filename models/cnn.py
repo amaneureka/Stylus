@@ -2,7 +2,7 @@
 # @Author: Aman Priyadarshi
 # @Date:   2017-04-17 18:18:50
 # @Last Modified by:   Aman Priyadarshi
-# @Last Modified time: 2017-04-17 19:37:33
+# @Last Modified time: 2017-04-17 22:09:13
 
 import numpy as np
 import tensorflow as tf
@@ -11,10 +11,9 @@ import tensorflow as tf
 def cnn_layer(input, num_channels, num_filters, filter_shape):
 
     # shape = [filter_height, filter_width, input_channels, output_channels]
-    kernel_shape = [filter_shape[0], filter_shape[
-        1], num_channels, num_filters]
+    kernel_shape = [filter_shape[0], filter_shape[1], num_channels, num_filters]
     weights = tf.Variable(tf.truncated_normal(kernel_shape))
-    biases = tf.Variable(tf.constant(0.05, shape=[in_channels]))
+    biases = tf.Variable(tf.constant(0.05, shape=[num_filters]))
 
     layer = tf.nn.conv2d(input=input,
                          filter=weights,
@@ -56,22 +55,21 @@ def create_network(img_height, img_width, num_classes):
                            filter_shape=(5, 5))
 
     # shape = [images, height, width, channels]
-    layer2_shape = layer2.get_shape()
-    features = layer2[1:].num_elements()
+    features = layer2.get_shape()[1:].num_elements()
     layer2_flat = tf.reshape(layer2, shape=[-1, features])
 
     # two fully connected layers
     layer3, w3 = fc_layer(input=layer2_flat,
                           num_input=features,
-                          num_output=500)
+                          num_output=10)
     layer3 = tf.nn.tanh(layer3)
     layer4, w4 = fc_layer(input=layer3,
-                          num_input=500,
+                          num_input=10,
                           num_output=num_classes)
     y = tf.nn.softmax(layer4)
 
     # learning
-    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=layer4, labels=y)
+    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=layer4, labels=y_true)
     cost = tf.reduce_mean(cross_entropy)
     optimizer = tf.train.RMSPropOptimizer(learning_rate=1e-5).minimize(cost)
     return x, y, y_true, optimizer
