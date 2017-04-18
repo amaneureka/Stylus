@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # @Author: Aman Priyadarshi
 # @Date:   2017-04-17 18:18:50
-# @Last Modified by:   Aman Priyadarshi
-# @Last Modified time: 2017-04-17 22:09:13
+# @Last Modified by:   amaneureka
+# @Last Modified time: 2017-04-19 04:02:34
 
 import numpy as np
 import tensorflow as tf
@@ -61,15 +61,15 @@ def create_network(img_height, img_width, num_classes):
     # two fully connected layers
     layer3, w3 = fc_layer(input=layer2_flat,
                           num_input=features,
-                          num_output=10)
+                          num_output=50)
     layer3 = tf.nn.tanh(layer3)
     layer4, w4 = fc_layer(input=layer3,
-                          num_input=10,
+                          num_input=50,
                           num_output=num_classes)
     y = tf.nn.softmax(layer4)
 
     # learning
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=layer4, labels=y_true)
     cost = tf.reduce_mean(cross_entropy)
-    optimizer = tf.train.RMSPropOptimizer(learning_rate=1e-5).minimize(cost)
+    optimizer = tf.train.RMSPropOptimizer(learning_rate=1e-4).minimize(cost)
     return x, y, y_true, optimizer

@@ -1,22 +1,35 @@
 # -*- coding: utf-8 -*-
 # @Author: amaneureka
 # @Date:   2017-04-07 17:41:23
-# @Last Modified by:   Aman Priyadarshi
-# @Last Modified time: 2017-04-17 18:05:32
+# @Last Modified by:   amaneureka
+# @Last Modified time: 2017-04-19 03:56:19
 
 import cv2
+import math
 import numpy as np
 import progressbar
 import matplotlib.pyplot as plt
 
+num_classes = 62
+num_samples = 10
 
 def find_samples_bounding_rect(path):
 
 	min_w = 0
 	min_h = 0
 
-	for i in range(1, 63):
-		for j in range(1, 56):
+	print ('finding bounding box:')
+	bar = progressbar.ProgressBar(maxval=num_classes*num_samples,
+		widgets=[
+		' [', progressbar.Timer(), '] ',
+		progressbar.Bar(),
+		' (', progressbar.ETA(), ') ',
+	])
+	bar.start()
+	counter = 0
+
+	for i in range(1, num_classes + 1):
+		for j in range(1, num_samples + 1):
 
 			filename = '{0}/Sample{1:03d}/img{1:03d}-{2:03d}.png'.format(path, i, j)
 
@@ -31,13 +44,18 @@ def find_samples_bounding_rect(path):
 			min_w = max(min_w, w)
 			min_h = max(min_h, h)
 
+			# update progress bar
+			counter = counter + 1
+			bar.update(counter)
+
+	bar.finish()
 	return min_w, min_h
 
 
-def crop_images(path, width, height, showsamples):
+def crop_images(path, width, height, showsamples, scaling):
 
-	print 'cropping images:'
-	bar = progressbar.ProgressBar(maxval=62*56,
+	print ('cropping images:')
+	bar = progressbar.ProgressBar(maxval=num_classes*num_samples,
 		widgets=[
 		' [', progressbar.Timer(), '] ',
 		progressbar.Bar(),
@@ -46,10 +64,21 @@ def crop_images(path, width, height, showsamples):
 	bar.start()
 	counter = 0
 
+	new_width = int(width * scaling + 0.5)
+	new_height = int(height * scaling + 0.5)
+
 	with open(path + '/normalized.bin', 'wb') as f:
+
+		# dump configs
+		f.write((num_classes).to_bytes(4, byteorder='little'))
+		f.write((num_samples).to_bytes(4, byteorder='little'))
+		f.write((new_width).to_bytes(4, byteorder='little'))
+		f.write((new_height).to_bytes(4, byteorder='little'))
+
+		# dump images
 		img_canvas = np.zeros((height, width), dtype=np.uint8)
-		for i in range(1, 63):
-			for j in range(1, 56):
+		for i in range(1, num_classes + 1):
+			for j in range(1, num_samples + 1):
 
 				filename = '{0}/Sample{1:03d}/img{1:03d}-{2:03d}.png'.format(path, i, j)
 
@@ -61,8 +90,8 @@ def crop_images(path, width, height, showsamples):
 				x, y, w, h = cv2.boundingRect(contours[len(contours) - 1])
 
 				# center align character
-				offset_x = (width - w) / 2
-				offset_y = (height - h) / 2
+				offset_x = int((width - w) / 2)
+				offset_y = int((height - h) / 2)
 				x = max(x - offset_x, 0)
 				y = max(y - offset_y, 0)
 				newimg = imgray[y : y + height, x : x + width]
@@ -72,8 +101,12 @@ def crop_images(path, width, height, showsamples):
 				h = newimg.shape[0]
 				img_canvas[ : h, : w] = newimg
 
+
+				# resize image
+				newimg = cv2.resize(img_canvas, None, fx=scaling, fy=scaling, interpolation = cv2.INTER_AREA)
+
 				# append ndarry to file
-				f.write(img_canvas.flatten())
+				f.write(newimg.flatten())
 
 				# update progressbar
 				counter = counter + 1
@@ -81,13 +114,15 @@ def crop_images(path, width, height, showsamples):
 
 				# preview if requested
 				if showsamples:
-					plt.imshow(img_canvas, cmap='gray')
+					plt.imshow(newimg, cmap='gray')
 					plt.show()
 
 		f.close()
 	bar.finish()
+	return new_width, new_height
 
 if __name__ == '__main__':
-	width, height = 751, 841#find_samples_bounding_rect('dataset')
-	print width, height
-	crop_images('dataset', width, height, False)
+	width, height = find_samples_bounding_rect('dataset')
+	print('Bounding Rectangle:: width: %d height: %d' % (width, height))
+	width, height = crop_images('dataset', width, height, False, 0.1)
+	print('Cropping:: width: %d height: %d' % (width, height))
