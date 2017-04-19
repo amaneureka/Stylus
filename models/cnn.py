@@ -2,7 +2,7 @@
 # @Author: Aman Priyadarshi
 # @Date:   2017-04-17 18:18:50
 # @Last Modified by:   amaneureka
-# @Last Modified time: 2017-04-19 04:02:34
+# @Last Modified time: 2017-04-19 10:54:46
 
 import numpy as np
 import tensorflow as tf
@@ -20,11 +20,11 @@ def cnn_layer(input, num_channels, num_filters, filter_shape):
                          strides=[1, 1, 1, 1],
                          padding='SAME')
     layer = tf.add(layer, biases)
-    layer = tf.nn.avg_pool(value=layer,
+    layer = tf.nn.max_pool(value=layer,
                            ksize=[1, 2, 2, 1],
                            strides=[1, 1, 1, 1],
                            padding='SAME')
-    layer = tf.nn.tanh(layer)
+    layer = tf.nn.relu(layer)
     return layer, weights
 
 
@@ -61,10 +61,10 @@ def create_network(img_height, img_width, num_classes):
     # two fully connected layers
     layer3, w3 = fc_layer(input=layer2_flat,
                           num_input=features,
-                          num_output=50)
+                          num_output=200)
     layer3 = tf.nn.tanh(layer3)
     layer4, w4 = fc_layer(input=layer3,
-                          num_input=50,
+                          num_input=200,
                           num_output=num_classes)
     y = tf.nn.softmax(layer4)
 

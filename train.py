@@ -2,9 +2,10 @@
 # @Author: Aman Priyadarshi
 # @Date:   2017-04-17 11:39:30
 # @Last Modified by:   amaneureka
-# @Last Modified time: 2017-04-19 03:57:28
+# @Last Modified time: 2017-04-19 10:48:10
 
 import os
+import sys
 import argparse
 import numpy as np
 import tensorflow as tf
@@ -127,4 +128,5 @@ if __name__ == '__main__':
                     best_accuracy = acc
                     saver.save(sess=session, save_path=save_path)
                 print("validation accuracy #{0}: {2}{1:.9%}".format(i + 1, acc, msg))
+                sys.stdout.flush()
 
