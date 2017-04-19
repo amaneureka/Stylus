@@ -2,7 +2,7 @@
 # @Author: amaneureka
 # @Date:   2017-04-07 17:41:23
 # @Last Modified by:   amaneureka
-# @Last Modified time: 2017-04-19 03:56:19
+# @Last Modified time: 2017-04-19 21:57:26
 
 import cv2
 import math
@@ -11,7 +11,7 @@ import progressbar
 import matplotlib.pyplot as plt
 
 num_classes = 62
-num_samples = 10
+num_samples = 20
 
 def find_samples_bounding_rect(path):
 

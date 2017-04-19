@@ -2,7 +2,7 @@
 # @Author: Aman Priyadarshi
 # @Date:   2017-04-17 11:39:30
 # @Last Modified by:   amaneureka
-# @Last Modified time: 2017-04-19 10:48:10
+# @Last Modified time: 2017-04-19 22:05:18
 
 import os
 import sys
@@ -12,7 +12,6 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 
 import utility
-import normalize
 from models import cnn
 
 def load_training_data(filepath):
@@ -79,7 +78,7 @@ if __name__ == '__main__':
 
     # tensorflow session saver
     saver = tf.train.Saver()
-    savedir = 'saver'
+    savedir = '/output'
 
     if not os.path.exists(savedir):
         os.makedirs(savedir)
@@ -117,7 +116,7 @@ if __name__ == '__main__':
             perm = np.random.permutation(args.batch_size)
             input_x = img_train[perm]
             input_y = onehot[perm]
-            feed = {x : input_x, y_true: input_y}
+            feed = {x : img_train, y_true: onehot}
             session.run(optimizer, feed_dict=feed)
             # on every 100 iteration validate training
             if i % 100 == 0:
