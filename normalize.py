@@ -2,7 +2,7 @@
 # @Author: amaneureka
 # @Date:   2017-04-07 17:41:23
 # @Last Modified by:   amaneureka
-# @Last Modified time: 2017-04-19 21:57:26
+# @Last Modified time: 2017-04-20 11:31:36
 
 import cv2
 import math
@@ -11,7 +11,7 @@ import progressbar
 import matplotlib.pyplot as plt
 
 num_classes = 62
-num_samples = 20
+num_samples = 13
 
 def find_samples_bounding_rect(path):
 
@@ -52,7 +52,7 @@ def find_samples_bounding_rect(path):
 	return min_w, min_h
 
 
-def crop_images(path, width, height, showsamples, scaling):
+def crop_images(filename, path, samplestart, width, height, showsamples, scaling):
 
 	print ('cropping images:')
 	bar = progressbar.ProgressBar(maxval=num_classes*num_samples,
@@ -67,7 +67,7 @@ def crop_images(path, width, height, showsamples, scaling):
 	new_width = int(width * scaling + 0.5)
 	new_height = int(height * scaling + 0.5)
 
-	with open(path + '/normalized.bin', 'wb') as f:
+	with open(path + filename, 'wb') as f:
 
 		# dump configs
 		f.write((num_classes).to_bytes(4, byteorder='little'))
@@ -78,7 +78,7 @@ def crop_images(path, width, height, showsamples, scaling):
 		# dump images
 		img_canvas = np.zeros((height, width), dtype=np.uint8)
 		for i in range(1, num_classes + 1):
-			for j in range(1, num_samples + 1):
+			for j in range(samplestart, samplestart + num_samples):
 
 				filename = '{0}/Sample{1:03d}/img{1:03d}-{2:03d}.png'.format(path, i, j)
 
@@ -124,5 +124,7 @@ def crop_images(path, width, height, showsamples, scaling):
 if __name__ == '__main__':
 	width, height = find_samples_bounding_rect('dataset')
 	print('Bounding Rectangle:: width: %d height: %d' % (width, height))
-	width, height = crop_images('dataset', width, height, False, 0.1)
+	_, _ = crop_images('/normalized-train.bin', 'dataset', 1, width, height, False, 0.1)
+	num_samples = 7
+	width, height = crop_images('/normalized-val.bin', 'dataset', 14, width, height, False, 0.1)
 	print('Cropping:: width: %d height: %d' % (width, height))

@@ -2,12 +2,12 @@
 # @Author: Aman Priyadarshi
 # @Date:   2017-04-17 18:18:50
 # @Last Modified by:   amaneureka
-# @Last Modified time: 2017-04-19 21:56:06
+# @Last Modified time: 2017-04-20 00:26:56
 
 import numpy as np
 import tensorflow as tf
 
-def cnn_layer(input, num_channels, num_filters, filter_shape, dropout=0.75):
+def cnn_layer(input, num_channels, num_filters, filter_shape):
 
     # shape = [filter_height, filter_width, input_channels, output_channels]
     kernel_shape = [filter_shape[0], filter_shape[1], num_channels, num_filters]
@@ -24,7 +24,6 @@ def cnn_layer(input, num_channels, num_filters, filter_shape, dropout=0.75):
                            strides=[1, 1, 1, 1],
                            padding='SAME')
     layer = tf.nn.relu(layer)
-    layer = tf.nn.dropout(layer, dropout)
     return layer, weights
 
 
@@ -49,6 +48,7 @@ def create_network(img_height, img_width, num_classes):
                            num_channels=1,
                            num_filters=5,
                            filter_shape=(3, 3))
+    layer1 = tf.nn.dropout(layer1, 0.9)
     layer2, w2 = cnn_layer(input=layer1,
                            num_channels=5,
                            num_filters=10,
@@ -71,5 +71,5 @@ def create_network(img_height, img_width, num_classes):
     # learning
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=layer4, labels=y_true)
     cost = tf.reduce_mean(cross_entropy)
-    optimizer = tf.train.RMSPropOptimizer(learning_rate=0.001).minimize(cost)
+    optimizer = tf.train.RMSPropOptimizer(learning_rate=0.003).minimize(cost)
     return x, y, y_true, optimizer
