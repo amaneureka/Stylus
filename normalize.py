@@ -2,7 +2,7 @@
 # @Author: amaneureka
 # @Date:   2017-04-07 17:41:23
 # @Last Modified by:   amaneureka
-# @Last Modified time: 2017-04-20 11:31:36
+# @Last Modified time: 2017-04-20 20:26:45
 
 import cv2
 import math
@@ -11,7 +11,7 @@ import progressbar
 import matplotlib.pyplot as plt
 
 num_classes = 62
-num_samples = 13
+num_samples = 26
 
 def find_samples_bounding_rect(path):
 
@@ -101,7 +101,6 @@ def crop_images(filename, path, samplestart, width, height, showsamples, scaling
 				h = newimg.shape[0]
 				img_canvas[ : h, : w] = newimg
 
-
 				# resize image
 				newimg = cv2.resize(img_canvas, None, fx=scaling, fy=scaling, interpolation = cv2.INTER_AREA)
 
@@ -125,6 +124,6 @@ if __name__ == '__main__':
 	width, height = find_samples_bounding_rect('dataset')
 	print('Bounding Rectangle:: width: %d height: %d' % (width, height))
 	_, _ = crop_images('/normalized-train.bin', 'dataset', 1, width, height, False, 0.1)
-	num_samples = 7
+	num_samples = 14
 	width, height = crop_images('/normalized-val.bin', 'dataset', 14, width, height, False, 0.1)
 	print('Cropping:: width: %d height: %d' % (width, height))

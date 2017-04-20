@@ -2,7 +2,7 @@
 # @Author: Aman Priyadarshi
 # @Date:   2017-04-17 18:18:50
 # @Last Modified by:   amaneureka
-# @Last Modified time: 2017-04-20 00:26:56
+# @Last Modified time: 2017-04-20 23:07:05
 
 import numpy as np
 import tensorflow as tf
@@ -19,6 +19,7 @@ def cnn_layer(input, num_channels, num_filters, filter_shape):
                          strides=[1, 1, 1, 1],
                          padding='SAME')
     layer = tf.add(layer, biases)
+    layer = tf.nn.dropout(layer, 0.75)
     layer = tf.nn.max_pool(value=layer,
                            ksize=[1, 2, 2, 1],
                            strides=[1, 1, 1, 1],
@@ -46,11 +47,10 @@ def create_network(img_height, img_width, num_classes):
     # two CNN layer
     layer1, w1 = cnn_layer(input=tensor,
                            num_channels=1,
-                           num_filters=5,
+                           num_filters=6,
                            filter_shape=(3, 3))
-    layer1 = tf.nn.dropout(layer1, 0.9)
     layer2, w2 = cnn_layer(input=layer1,
-                           num_channels=5,
+                           num_channels=6,
                            num_filters=10,
                            filter_shape=(5, 5))
 
