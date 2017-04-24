@@ -2,7 +2,7 @@
 # @Author: Aman Priyadarshi
 # @Date:   2017-04-17 11:39:30
 # @Last Modified by:   amaneureka
-# @Last Modified time: 2017-04-20 11:39:12
+# @Last Modified time: 2017-04-24 13:31:32
 
 import os
 import sys
@@ -46,18 +46,23 @@ if __name__ == '__main__':
                         default='validations', help='saver file name')
     parser.add_argument('--restore', action='store', dest='restore',
                         help='restore last session')
+    parser.add_argument('--savedir', action='store', dest='savedir',
+                        help='save directory', default='output')
+    parser.add_argument('--dataset', action='store', dest='dataset',
+                        help='dataset load directory', default='dataset')
     parser.add_argument('--train', action='store_true', dest='train',
                         default=False, help='train model')
     parser.add_argument('--show', action='store_true', dest='show_data',
                         help='display loaded dataset', default=False)
     parser.add_argument('--iterations', action='store', dest='iterations',
-                        help='training epochs count', type=int, default=10000)
-    parser.add_argument('--batch', action='store', dest='batch_size',
-                        help='training batch size', type=int, default=100)
+                        help='training epochs count', type=int, default=50000)
     args = parser.parse_args()
 
     # load data and show data
-    num_classes, width, height, img, img_class = load_training_data('dataset/normalized-train.bin')
+    train_dataset = os.path.join(args.dataset, 'normalized-train.bin')
+    validation_dataset = os.path.join(args.dataset, 'normalized-val.bin')
+
+    num_classes, width, height, img, img_class = load_training_data(train_dataset)
     if args.show_data == True:
         # disply dataset
         fig = plt.figure()
@@ -78,11 +83,13 @@ if __name__ == '__main__':
 
     # tensorflow session saver
     saver = tf.train.Saver()
-    savedir = '/output'
 
-    if not os.path.exists(savedir):
-        os.makedirs(savedir)
-    save_path = os.path.join(savedir, args.saver_file)
+    if not os.path.exists(args.savedir):
+        os.makedirs(args.savedir)
+    # tmp line
+    from shutil import copyfile
+    copyfile('models/cnn.py', '/output/cnn.py')
+    save_path = os.path.join(args.savedir, args.saver_file)
 
     # create tensorflow session
     session = tf.Session()
@@ -90,13 +97,13 @@ if __name__ == '__main__':
 
     # do we need to restore session?
     if args.restore is not None:
-        saver.restore(sess=session, save_path=save_path)
+        saver.restore(sess=session, save_path=args.restore)
 
     # train network of requested size
     if args.train > 0:
 
         # load datasets
-        _, _, _, img_val, img_class_val = load_training_data('dataset/normalized-val.bin')
+        _, _, _, img_val, img_class_val = load_training_data(validation_dataset)
 
         img_count = img.shape[0]
         feed_val = {x : img_val, y_true_cls : img_class_val}
@@ -108,26 +115,22 @@ if __name__ == '__main__':
         onehot = np.zeros((img_count, num_classes))
         onehot[np.arange(img_count), img_class] = 1
 
+        training_acc = 0.0
         best_accuracy = 0.0
-        training_accuracy = 0.0
         for i in range(args.iterations):
-            perm = np.random.permutation(args.batch_size)
-            input_x = img[perm]
-            input_y = onehot[perm]
-            input_lbl = img_class[perm]
-            feed = {x : input_x, y_true: input_y, y_true_cls: input_lbl}
+            feed = {x : img, y_true: onehot, y_true_cls: img_class}
             _, tacc = session.run([optimizer, accuracy], feed_dict=feed)
-            training_accuracy = training_accuracy + tacc
+            training_acc = training_acc + tacc
             # on every 100 iteration validate training
             if i % 100 == 0:
                 acc = session.run(accuracy, feed_dict=feed_val)
                 msg = ' '
-                training_accuracy /= 100.0
+                training_acc /= 100.0
                 if acc > best_accuracy:
                     msg = '*'
                     best_accuracy = acc
                     saver.save(sess=session, save_path=save_path)
-                print("accuracy #{0}: {3:.9%} {2}{1:.9%}".format(i + 1, acc, msg, training_accuracy))
-                training_accuracy = 0.0
+                print("accuracy #{0}: {3:.9%} {2}{1:.9%}".format(i + 1, acc, msg, training_acc))
+                training_acc = 0.0
                 sys.stdout.flush()
 

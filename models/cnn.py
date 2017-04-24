@@ -2,7 +2,7 @@
 # @Author: Aman Priyadarshi
 # @Date:   2017-04-17 18:18:50
 # @Last Modified by:   amaneureka
-# @Last Modified time: 2017-04-20 23:07:05
+# @Last Modified time: 2017-04-24 13:10:51
 
 import numpy as np
 import tensorflow as tf
@@ -19,12 +19,6 @@ def cnn_layer(input, num_channels, num_filters, filter_shape):
                          strides=[1, 1, 1, 1],
                          padding='SAME')
     layer = tf.add(layer, biases)
-    layer = tf.nn.dropout(layer, 0.75)
-    layer = tf.nn.max_pool(value=layer,
-                           ksize=[1, 2, 2, 1],
-                           strides=[1, 1, 1, 1],
-                           padding='SAME')
-    layer = tf.nn.relu(layer)
     return layer, weights
 
 
@@ -44,32 +38,45 @@ def create_network(img_height, img_width, num_classes):
     # input tensor
     tensor = tf.reshape(x, shape=[-1, img_height, img_width, 1])
 
-    # two CNN layer
-    layer1, w1 = cnn_layer(input=tensor,
+    # first CNN layer
+    layer, w1 = cnn_layer(input=tensor,
                            num_channels=1,
-                           num_filters=6,
-                           filter_shape=(3, 3))
-    layer2, w2 = cnn_layer(input=layer1,
-                           num_channels=6,
                            num_filters=10,
-                           filter_shape=(5, 5))
+                           filter_shape=(3, 3))
+    layer = tf.nn.max_pool(value=layer,
+                           ksize=[1, 3, 3, 1],
+                           strides=[1, 1, 1, 1],
+                           padding='SAME')
+    layer = tf.nn.dropout(layer, 0.75)
+    layer = tf.nn.relu(layer)
+
+    # second CNN layer
+    layer, w2 = cnn_layer(input=layer,
+                           num_channels=10,
+                           num_filters=8,
+                           filter_shape=(3, 3))
+    layer = tf.nn.relu(layer)
+    layer = tf.nn.avg_pool(value=layer,
+                           ksize=[1, 2, 2, 1],
+                           strides=[1, 1, 1, 1],
+                           padding='SAME')
 
     # shape = [images, height, width, channels]
-    features = layer2.get_shape()[1:].num_elements()
-    layer2_flat = tf.reshape(layer2, shape=[-1, features])
+    features = layer.get_shape()[1:].num_elements()
+    layer = tf.reshape(layer, shape=[-1, features])
 
     # two fully connected layers
-    layer3, w3 = fc_layer(input=layer2_flat,
+    layer, w4 = fc_layer(input=layer,
                           num_input=features,
-                          num_output=200)
-    layer3 = tf.nn.tanh(layer3)
-    layer4, w4 = fc_layer(input=layer3,
-                          num_input=200,
+                          num_output=500)
+    layer = tf.nn.tanh(layer)
+    layer, w5 = fc_layer(input=layer,
+                          num_input=500,
                           num_output=num_classes)
-    y = tf.nn.softmax(layer4)
+    y = tf.nn.softmax(layer)
 
     # learning
-    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=layer4, labels=y_true)
+    cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=layer, labels=y_true)
     cost = tf.reduce_mean(cross_entropy)
     optimizer = tf.train.RMSPropOptimizer(learning_rate=0.003).minimize(cost)
     return x, y, y_true, optimizer

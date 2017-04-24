@@ -2,7 +2,7 @@
 # @Author: amaneureka
 # @Date:   2017-04-07 17:41:23
 # @Last Modified by:   amaneureka
-# @Last Modified time: 2017-04-20 20:26:45
+# @Last Modified time: 2017-04-21 03:10:08
 
 import cv2
 import math
@@ -11,7 +11,7 @@ import progressbar
 import matplotlib.pyplot as plt
 
 num_classes = 62
-num_samples = 26
+num_samples = 30
 
 def find_samples_bounding_rect(path):
 
@@ -99,7 +99,8 @@ def crop_images(filename, path, samplestart, width, height, showsamples, scaling
 				# fix images which has lower dimensions
 				w = newimg.shape[1]
 				h = newimg.shape[0]
-				img_canvas[ : h, : w] = newimg
+				img_canvas.fill(0)
+				img_canvas[:h,:w] = newimg
 
 				# resize image
 				newimg = cv2.resize(img_canvas, None, fx=scaling, fy=scaling, interpolation = cv2.INTER_AREA)
@@ -112,7 +113,7 @@ def crop_images(filename, path, samplestart, width, height, showsamples, scaling
 				bar.update(counter)
 
 				# preview if requested
-				if showsamples:
+				if showsamples and j == 1:
 					plt.imshow(newimg, cmap='gray')
 					plt.show()
 
@@ -124,6 +125,6 @@ if __name__ == '__main__':
 	width, height = find_samples_bounding_rect('dataset')
 	print('Bounding Rectangle:: width: %d height: %d' % (width, height))
 	_, _ = crop_images('/normalized-train.bin', 'dataset', 1, width, height, False, 0.1)
-	num_samples = 14
+	num_samples = 25
 	width, height = crop_images('/normalized-val.bin', 'dataset', 14, width, height, False, 0.1)
 	print('Cropping:: width: %d height: %d' % (width, height))
