@@ -2,7 +2,7 @@
 # @Author: amaneureka
 # @Date:   2017-04-07 17:41:23
 # @Last Modified by:   amaneureka
-# @Last Modified time: 2017-04-21 03:10:08
+# @Last Modified time: 2017-04-26 03:21:00
 
 import cv2
 import math
@@ -11,7 +11,7 @@ import progressbar
 import matplotlib.pyplot as plt
 
 num_classes = 62
-num_samples = 30
+num_samples = 33
 
 def find_samples_bounding_rect(path):
 
@@ -89,12 +89,10 @@ def crop_images(filename, path, samplestart, width, height, showsamples, scaling
 				_, contours, _ = cv2.findContours(imgray, cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
 				x, y, w, h = cv2.boundingRect(contours[len(contours) - 1])
 
-				# center align character
-				offset_x = int((width - w) / 2)
-				offset_y = int((height - h) / 2)
-				x = max(x - offset_x, 0)
-				y = max(y - offset_y, 0)
 				newimg = imgray[y : y + height, x : x + width]
+				factor = min(float(width/w), float(height/h))
+				factor = max(factor, 1.0)
+				newimg = cv2.resize(newimg, None, fx=factor, fy=factor, interpolation = cv2.INTER_CUBIC)[:height, :width]
 
 				# fix images which has lower dimensions
 				w = newimg.shape[1]
@@ -113,7 +111,7 @@ def crop_images(filename, path, samplestart, width, height, showsamples, scaling
 				bar.update(counter)
 
 				# preview if requested
-				if showsamples and j == 1:
+				if showsamples:
 					plt.imshow(newimg, cmap='gray')
 					plt.show()
 
@@ -125,6 +123,6 @@ if __name__ == '__main__':
 	width, height = find_samples_bounding_rect('dataset')
 	print('Bounding Rectangle:: width: %d height: %d' % (width, height))
 	_, _ = crop_images('/normalized-train.bin', 'dataset', 1, width, height, False, 0.1)
-	num_samples = 25
+	num_samples = 22
 	width, height = crop_images('/normalized-val.bin', 'dataset', 14, width, height, False, 0.1)
 	print('Cropping:: width: %d height: %d' % (width, height))

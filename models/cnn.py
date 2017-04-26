@@ -2,7 +2,7 @@
 # @Author: Aman Priyadarshi
 # @Date:   2017-04-17 18:18:50
 # @Last Modified by:   amaneureka
-# @Last Modified time: 2017-04-24 13:10:51
+# @Last Modified time: 2017-04-26 04:56:16
 
 import numpy as np
 import tensorflow as tf
@@ -41,25 +41,25 @@ def create_network(img_height, img_width, num_classes):
     # first CNN layer
     layer, w1 = cnn_layer(input=tensor,
                            num_channels=1,
-                           num_filters=10,
+                           num_filters=16,
                            filter_shape=(3, 3))
     layer = tf.nn.max_pool(value=layer,
                            ksize=[1, 3, 3, 1],
                            strides=[1, 1, 1, 1],
                            padding='SAME')
-    layer = tf.nn.dropout(layer, 0.75)
     layer = tf.nn.relu(layer)
 
     # second CNN layer
     layer, w2 = cnn_layer(input=layer,
-                           num_channels=10,
-                           num_filters=8,
+                           num_channels=16,
+                           num_filters=10,
                            filter_shape=(3, 3))
-    layer = tf.nn.relu(layer)
-    layer = tf.nn.avg_pool(value=layer,
+    layer = tf.nn.max_pool(value=layer,
                            ksize=[1, 2, 2, 1],
                            strides=[1, 1, 1, 1],
                            padding='SAME')
+    # layer = tf.nn.dropout(layer, 0.75)
+    layer = tf.nn.relu(layer)
 
     # shape = [images, height, width, channels]
     features = layer.get_shape()[1:].num_elements()
@@ -70,7 +70,7 @@ def create_network(img_height, img_width, num_classes):
                           num_input=features,
                           num_output=500)
     layer = tf.nn.tanh(layer)
-    layer, w5 = fc_layer(input=layer,
+    layer, w6 = fc_layer(input=layer,
                           num_input=500,
                           num_output=num_classes)
     y = tf.nn.softmax(layer)
@@ -78,5 +78,5 @@ def create_network(img_height, img_width, num_classes):
     # learning
     cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=layer, labels=y_true)
     cost = tf.reduce_mean(cross_entropy)
-    optimizer = tf.train.RMSPropOptimizer(learning_rate=0.003).minimize(cost)
+    optimizer = tf.train.RMSPropOptimizer(learning_rate=0.0025).minimize(cost)
     return x, y, y_true, optimizer
