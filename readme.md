@@ -4,19 +4,19 @@ An offline handwriting recognition hardware and tensorflow based model implement
 #### Model
 ##### Structure
 - Convolution Layer
- - 16 3x3 Filters
+	- 16 3x3 Filters
 - Max Pool
- - 3x3 Same Padding
+	- 3x3 Same Padding
 - Rectified Linear Unit
 - Convolution Layer
- - 10 3x3 Filters
+	- 10 3x3 Filters
 - Max Pool
- - 2x2 Same Padding
+	- 2x2 Same Padding
 - Rectified Linear Unit
 - Inception 16 filters
 - Fully Connected
- - 1 Hidden Layer, 500 Neurons
- - TanH activation
+	- 1 Hidden Layer, 500 Neurons
+	- TanH activation
 - Softmax Layer
 ##### Can I edit the model?
 Yes, Model structure is stored seperately in ```models/cnn.py```. ```Train.py``` expects following function from a model script
@@ -28,11 +28,11 @@ And it should return ```x, y, y_true, optimizer```
 ```train.py``` has been designed to aid this by using preconfigured values and training method. You can expect a detailed explanation of different parameters by typing ```train.py --help```.
 examples
 - ```train.py --show```
-  - Show loaded training data
+	- Show loaded training data
 - ```train.py --train```
-  - Train model
+	- Train model
 - ```train.py --restore save/validations```
-  - Test model
+	- Test model
 #### Dataset
 ##### About
 We're using public dataset [Chars74K](http://www.ee.surrey.ac.uk/CVSSP/demos/chars74k/)
@@ -57,8 +57,8 @@ We're are preprocessing dataset because of various reasons
 ##### How to preprocess data ?
 You can preprocess data after downloading dataset by executing ```python normalize.py```
 - It expects that system has all the dependencies installed
-  - ```pip3 install -r requirements.txt```
-  - ```bash ./dataset.sh```
+	- ```pip3 install -r requirements.txt```
+	- ```bash ./dataset.sh```
 
 It will create two files ```normalized-train.bin``` & ```normalized-val.bin``` under ```dataset``` directory.
 ##### Normalized dataset
