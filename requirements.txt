@@ -2,3 +2,4 @@ numpy
 opencv-python
 matplotlib
 progressbar33
+pygame
