@@ -1,8 +1,9 @@
-## Stylus
-An offline handwriting recognition hardware and tensorflow based model implementation that will let you type with ease. Right now it is supporting english alphabets and numerics. That are 62 symbols!
+## Smart Stylus™
+An offline handwriting recognition pen like hardware and tensorflow based model implementation that will type what you write with it. Right now it supports english alphabets and numbers. That are 62 symbols!
+
 
 #### Screenshot
-##### Stylus from scratch
+##### Smart Stylus™ from scratch
 ![Hardware](http://i.imgur.com/5clAtPc.png)
 ##### Trained Model in Action
 ![Stylus in Action](http://i.imgur.com/U7bQRkW.png)
@@ -71,7 +72,7 @@ It will create two files ```normalized-train.bin``` & ```normalized-val.bin``` u
 ![Normalized dataset](http://i.imgur.com/FwmpAHn.png)
 
 #### Project
-This is a part of Acadmic Project Report under **Practical Training** (COE-320) at [**NSIT**](www.nsit.ac.in).
+This is a part of Academic Project Report under **Practical Training** (COE-320) at [**NSIT**](www.nsit.ac.in).
 
 #### Contributors
 - Arko Gupta
