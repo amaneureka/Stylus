@@ -2,17 +2,22 @@
 # @Author: amaneureka
 # @Date:   2017-05-19 00:54:11
 # @Last Modified by:   amaneureka
-# @Last Modified time: 2017-05-19 04:21:08
+# @Last Modified time: 2017-05-19 12:13:45
 
 import cv2
 import pygame
 import random
 import argparse
 import numpy as np
+import tensorflow as tf
 import matplotlib.pyplot as plt
+
+import utility
+from models import cnn
 
 sample_width = 74
 sample_height = 77
+sample_num_class = 62
 
 def select_color():
 	return (random.randrange(256), random.randrange(256), random.randrange(256))
@@ -50,15 +55,27 @@ if __name__ == '__main__':
 						help='screen height', type=int, default=600)
 	parser.add_argument('--radius', action='store', dest='stroke_radius',
 						help='stroke radius', type=int, default=10)
+	parser.add_argument('--restore', action='store', dest='restore',
+						help='restore network model', required=True)
 	args = parser.parse_args()
+
+	# restore network
+	x, y, _, _ = cnn.create_network(sample_height, sample_width, sample_num_class)
+	y_pred_cls = tf.argmax(y, dimension=1)
+
+	session = tf.Session()
+	session.run(tf.global_variables_initializer())
+
+	saver = tf.train.Saver()
+	saver.restore(sess=session, save_path=args.restore)
 
 	# paint program
 	pygame.init()
 	screen = pygame.display.set_mode((args.scr_width, args.scr_height))
+	pygame.display.set_caption('Stylus')
 	myfont = pygame.font.SysFont("arial", 20)
 	last_pos = (0, 0)
 	status_pos = (5, 10)
-	counter = 0
 	enable_drawing = False
 	radius = args.stroke_radius
 	prev_rect = pygame.Rect(0, 0, 0, 0)
@@ -70,18 +87,14 @@ if __name__ == '__main__':
 			e = pygame.event.wait()
 			if e.type == pygame.QUIT:
 				raise StopIteration
+			elif e.type == pygame.KEYDOWN:
+				enable_drawing = False
+				pygame.display.update(screen.fill((0, 0, 0)))
 			elif e.type == pygame.MOUSEBUTTONDOWN:
 				color = select_color()
 				enable_drawing = True
 			elif e.type == pygame.MOUSEBUTTONUP:
 				enable_drawing = False
-
-				# show prediction status
-				label = myfont.render("Counter: {}".format(counter), 1, (255, 255, 255))
-				pygame.display.update(screen.fill((0, 0, 0), rect=prev_rect))
-				pygame.display.update(screen.blit(label, status_pos))
-				prev_rect = label.get_rect(topleft=status_pos)
-				counter = counter + 1
 				try:
 					# get bounding image
 					img = normalize_pygame_image(screen, prev_rect.bottomright, sample_width, sample_height)
@@ -91,8 +104,19 @@ if __name__ == '__main__':
 					img_canvas.fill(0)
 					img_canvas[:h,:w] = img
 
-					plt.imshow(img_canvas, cmap='gray')
-					plt.show()
+					# plt.imshow(img_canvas, cmap='gray')
+					# plt.show()
+
+					feed = {x : img_canvas.reshape(1, -1)}
+					prd_matrix, prd = session.run([y, y_pred_cls], feed_dict=feed)
+					loss = prd_matrix[0, prd - 1][0]
+					print(utility.SAMPLE(prd).name, loss)
+
+					# show prediction status
+					label = myfont.render("Prediction: {0} {1}".format(utility.SAMPLE(prd).name, loss), 1, (255, 255, 255))
+					pygame.display.update(screen.fill((0, 0, 0), rect=prev_rect))
+					pygame.display.update(screen.blit(label, status_pos))
+					prev_rect = label.get_rect(topleft=status_pos)
 
 				except:
 					pass
