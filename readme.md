@@ -8,6 +8,11 @@ An offline handwriting recognition pen like hardware and tensorflow based model 
 ##### Trained Model in Action
 ![Stylus in Action](http://i.imgur.com/U7bQRkW.png)
 
+#### Basic Hardware Concept
+The circuitry used by a mouse for recognizing and tracking movement have been embedded in the structure of a pen . Thus ,when you use the pen to write the CNN converts them to letters and produces a typed result.  
+
+
+
 #### Model
 ##### Structure
 - Convolution Layer
