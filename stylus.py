@@ -2,7 +2,7 @@
 # @Author: amaneureka
 # @Date:   2017-05-19 00:54:11
 # @Last Modified by:   amaneureka
-# @Last Modified time: 2017-05-19 12:13:45
+# @Last Modified time: 2017-05-19 12:52:17
 
 import cv2
 import pygame
@@ -37,7 +37,7 @@ def normalize_pygame_image(screen, topleft, width, height):
 	img.shape = (screen.get_height(), screen.get_width(), -1)
 	img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 	img = img[topleft[1]:, topleft[0]:]
-	_, img = cv2.threshold(img, 1, 255, cv2.THRESH_BINARY)
+	_, img = cv2.threshold(img, 128, 255, cv2.THRESH_BINARY)
 	_, contours, _ = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 	x, y, w, h = cv2.boundingRect(contours[len(contours) - 1])
 	img = img[y:y+h, x:x+w]
@@ -88,7 +88,6 @@ if __name__ == '__main__':
 			if e.type == pygame.QUIT:
 				raise StopIteration
 			elif e.type == pygame.KEYDOWN:
-				enable_drawing = False
 				pygame.display.update(screen.fill((0, 0, 0)))
 			elif e.type == pygame.MOUSEBUTTONDOWN:
 				color = select_color()
@@ -110,10 +109,11 @@ if __name__ == '__main__':
 					feed = {x : img_canvas.reshape(1, -1)}
 					prd_matrix, prd = session.run([y, y_pred_cls], feed_dict=feed)
 					loss = prd_matrix[0, prd - 1][0]
-					print(utility.SAMPLE(prd).name, loss)
+					prd = utility.SAMPLE(prd).name
+					print(prd, loss)
 
 					# show prediction status
-					label = myfont.render("Prediction: {0} {1}".format(utility.SAMPLE(prd).name, loss), 1, (255, 255, 255))
+					label = myfont.render("Prediction: {0} {1}".format(prd, loss), 1, (255, 255, 255))
 					pygame.display.update(screen.fill((0, 0, 0), rect=prev_rect))
 					pygame.display.update(screen.blit(label, status_pos))
 					prev_rect = label.get_rect(topleft=status_pos)

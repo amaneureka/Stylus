@@ -1,6 +1,12 @@
 ## Stylus
 An offline handwriting recognition hardware and tensorflow based model implementation that will let you type with ease. Right now it is supporting english alphabets and numerics. That are 62 symbols!
 
+#### Screenshot
+##### Stylus from scratch
+![Hardware](http://i.imgur.com/5clAtPc.png)
+##### Trained Model in Action
+![Stylus in Action](http://i.imgur.com/U7bQRkW.png)
+
 #### Model
 ##### Structure
 - Convolution Layer
