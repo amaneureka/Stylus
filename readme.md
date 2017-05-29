@@ -71,6 +71,7 @@ You can preprocess data after downloading dataset by executing ```python normali
 - It expects that system has all the dependencies installed
 	- ```pip3 install -r requirements.txt```
 	- ```bash ./dataset.sh```
+	- ```python normalize.py```
 
 It will create two files ```normalized-train.bin``` & ```normalized-val.bin``` under ```dataset``` directory.
 ##### Normalized dataset
